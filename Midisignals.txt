@@ -1,0 +1,37 @@
+================
+# MIDI SIGNALS #
+================
+
+
+Channel 1: Kinect
+-----------------
+
+CC 20 : Start the kinect clip (velocity 127);
+CC 21 : stop the kinect clip (velocity 127);
+
+CC 04 : Linkerhand x-pos naar kinect params in Live
+CC 05 : Linkerhand y-pos naar kinect params in Live
+CC 07 : rechterhand x-pos naar kinect params in Live
+CC 08 : rechterhand y-pos naar kinect params in Live
+
+
+
+
+
+
+Channel 15: Video
+-----------------
+
+CC 20 : start de kinectvideo op vel 127 en stopt op vel 0
+
+CC 30 : drumpad 1 video
+CC 31 : drumpad 2 video
+CC 32 : drumpad 3 video
+CC 33 : drumpad 4 video
+CC 34 : drumpad 5 video
+CC 35 : drumpad 6 video
+
+
+CC 01 : past RED add waarde aan op Kinectvideo tussen 0.35 en 0.65 Met linkerhand-xpos
+CC 02 : past GREEN add waarde aan op Kinectvideo tussen 0.35 en 0.65 met rechterhand-xpos
+CC 03 : past BLUE add waarde aan op Kinectvideo tussen 0.35 en 0.65 met rechterhand-ypos

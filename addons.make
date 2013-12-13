@@ -1,0 +1,8 @@
+ofxGui
+ofxKinect
+ofxOpenCv
+ofxVectorGraphics
+ofxLeapMotion
+ofxMidi
+ofxOpenNI
+ofxSyphon
