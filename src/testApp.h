@@ -5,8 +5,10 @@
 #include "ofxMidi.h"
 #include "ofxLeapMotion.h"
 #include "ofxSyphon.h"
-#include "ofxOpenNI.h"
 #include "ofxParticles.h"
+#include "ofxOpenCv.h"
+#include "ofxKinect.h"
+
 
 class testApp : public ofBaseApp{
 
@@ -20,6 +22,7 @@ class testApp : public ofBaseApp{
         void gotMessage(ofMessage msg);
     
         bool showData = false;
+    bool log = false;
     
     // ===== LEAP =====
         ofxLeapMotion leap;
@@ -33,18 +36,30 @@ class testApp : public ofBaseApp{
     
     
     // ===== KINECT =====
-        ofxHardwareDriver kinect;
-        ofxIntSlider KinectAngleSlider;
-        ofxOpenNIContext NIContext;
-        ofxDepthGenerator NIdepthGen;
-        ofxUserGenerator NIuserGen;
-        bool _userDetected;
-        void setUserDetected(bool userDetected);
+    ofxKinect kinect;
+    ofxCvGrayscaleImage grayImage;
+    ofxCvGrayscaleImage grayBg;
+    ofxCvGrayscaleImage grayDiff;
+    ofxCvContourFinder contourFinder;
     
-        void updateKinectData();
-        void setKinectAngle(int & angle);
-        ofPoint Rhand;
-        ofPoint Lhand;
+    ofxPanel kinectDataPanel;
+    ofxIntSlider KinectAngleSlider;
+    ofxIntSlider videoThresholdSlider;
+    ofxVec2Slider contourAreaSlider;
+    ofxVec2Slider cameraViewSlider;
+    ofxButton btnSetBackground;
+    bool _userDetected;
+    bool showKinectControls = false;
+    void setUserDetected(bool userDetected);
+    bool backgroundSet = false;
+    int videoTreshold = 80;
+    
+    void updateKinectData();
+    void setBackgroundImg();
+    void setKinectAngle(int & angle);
+    void setVideoThreshold(int & threshold);
+    
+    
     
     // ===== ARDUINO =====
         ofArduino arduino;

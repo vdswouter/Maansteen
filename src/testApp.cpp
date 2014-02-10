@@ -15,33 +15,33 @@ void testApp::setup(){
     
     
     //start de leapmotion
-    leap.open();
+//    leap.open();
     
     //setup the arduino over firmata
-    arduino.connect("/dev/tty.usbmodem14531",57600);
-    ofAddListener(arduino.EInitialized, this, &testApp::setupArduino);
-    arduinoIsSetup = false;
-    treshold.setup("Pads Treshold", _treshold, 0, 80);
-    treshold.setPosition(600, 330);
-    treshold.addListener(this, &testApp::setTreshold);
+//    arduino.connect("/dev/tty.usbmodem14531",57600);
+//    ofAddListener(arduino.EInitialized, this, &testApp::setupArduino);
+//    arduinoIsSetup = false;
+//    treshold.setup("Pads Treshold", _treshold, 0, 80);
+//    treshold.setPosition(600, 330);
+//    treshold.addListener(this, &testApp::setTreshold);
     
     //kinect device aanspreken voor beeldhoek
-    kinect.setup();
-    KinectAngleSlider.setup("Kinect Angle", kinect.getTiltAngle(), -30, 30);
-    KinectAngleSlider.setPosition(300, 330);
-    KinectAngleSlider.addListener(this, &testApp::setKinectAngle);
-    //kinect oproepen via openNI
-    NIContext.setup();
-    NIdepthGen.setup(&NIContext);
-    NIuserGen.setup(&NIContext);
-    NIuserGen.setMaxNumberOfUsers(1);
-    NIContext.registerViewport();
-    _userDetected = false;
-    Rhand.x = 0;
-    Rhand.y = 0;
-    Lhand.x = 0;
-    Lhand.y = 0;
+    kinect.init();
+    grayImage.allocate(640,480);
+	grayBg.allocate(640,480);
+	grayDiff.allocate(640,480);
     
+    KinectAngleSlider.addListener(this, &testApp::setKinectAngle);
+    videoThresholdSlider.addListener(this, &testApp::setVideoThreshold);
+    btnSetBackground.addListener(this, &testApp::setBackgroundImg);
+
+    kinectDataPanel.setup();
+    kinectDataPanel.add(KinectAngleSlider.setup("Kinect Angle", kinect.getCurrentCameraTiltAngle(), -30, 30));
+    kinectDataPanel.add(cameraViewSlider.setup("Kinect View Depth (mm)", ofVec2f(500, 6000), ofVec2f(0, 0), ofVec2f(8000, 8000)));
+    kinectDataPanel.add(videoThresholdSlider.setup("threshold", videoTreshold, 0, 200));
+    kinectDataPanel.add(contourAreaSlider.setup("Contour Area", ofVec2f(5000, 20000), ofVec2f(0, 0), ofVec2f(100000, 100000)));
+    kinectDataPanel.add(btnSetBackground.setup("Set the background"));
+    _userDetected = false;
     
     //syphon server opstarten voor het doorsturen van de beelden naar het syphon framework
     syphonOutput.setName("Maansteen");
@@ -52,11 +52,11 @@ void testApp::setup(){
 }
 
 void testApp::update(){
-    GetLeapData();
-    updateArduino();
+//    GetLeapData();
+//    updateArduino();
     updateKinectData();
     
-    sendMidiSignals();
+//    sendMidiSignals();
 }
 
 void testApp::draw(){
@@ -70,6 +70,8 @@ void testApp::draw(){
 
     // hiervoor alle drawing die naar Syphon wordt gestuurd.
     syphonOutput.publishScreen();
+    
+
     
     ofEnableBlendMode(OF_BLENDMODE_DISABLED);
     ofSetColor(255);
@@ -85,21 +87,16 @@ void testApp::draw(){
         }
         
         // kinectdata
-        NIdepthGen.draw(0,0,440,330);
-        NIuserGen.draw(440,330);
-        ofDrawBitmapString("Kinect DepthImage + Users", 5, 340);
-        if (_userDetected) {
-            ofSetColor(255, 255, 50);
-            ofCircle((Lhand.x / 640)*440, (Lhand.y / 480)*330, 10);
-            ofCircle((Rhand.x / 640)*440, (Rhand.y / 480)*330, 10);
-            ofSetColor(255);
-            ofDrawBitmapString("L-X: "+ofToString(Lhand.x), 440, 40);
-            ofDrawBitmapString("L-Y: "+ofToString(Lhand.y), 440, 70);
-            ofDrawBitmapString("R-X: "+ofToString(Rhand.x), 440, 100);
-            ofDrawBitmapString("R-Y: "+ofToString(Rhand.y), 440, 130);
-        }
         ofSetColor(255);
-        KinectAngleSlider.draw();
+        
+        grayImage.draw(0, 0,500,333);
+        contourFinder.draw(0,0,500,333);
+        if(showKinectControls){
+            grayDiff.draw(100,250,100,67);
+            grayBg.draw(0, 250,100, 67);
+            kinectDataPanel.draw();
+        }
+
         ofLine(0, 350, 1024, 350);
         
         //padsdata
@@ -248,33 +245,29 @@ void testApp::updateParticles(){
 // ===== KINECT =====
 
 void testApp::updateKinectData(){
-    NIContext.update();
-    NIdepthGen.update();
-    NIuserGen.update();
+    kinect.update();
+    kinect.setDepthClipping(cameraViewSlider->x,cameraViewSlider->y);
     
-    if (NIuserGen.getNumberOfTrackedUsers() > 0) {
-        setUserDetected(true);
-        ofxTrackedUser user = *NIuserGen.getTrackedUser(NIuserGen.getNumberOfTrackedUsers());
-//        ofLogNotice() << "calibrating:" << user.skeletonCalibrating << " calibrated:" << user.skeletonCalibrated << " tracking:" <<  user.skeletonTracking;
-//        ofLogNotice() << "needs pose for calibration: " << NIuserGen.needsPoseForCalibration();
-        arduino.sendDigital(waitingForUserPin, ARD_LOW);
-        if (NIuserGen.userCalibrated) {
-            arduino.sendDigital(letsDancePin, ARD_HIGH);
-            arduino.sendDigital(calibratingPin, ARD_LOW);
-        }else{
-            arduino.sendDigital(calibratingPin, ARD_HIGH);
-            arduino.sendDigital(letsDancePin, ARD_LOW);
+    if (kinect.isFrameNewDepth()) {
+        grayImage.setFromPixels(kinect.getDepthPixels(), 640, 480);
+        if (backgroundSet) {
+            grayDiff.absDiff(grayBg, grayImage);
+            grayDiff.threshold(videoTreshold);
+            grayDiff.threshold(videoTreshold);
+            contourFinder.findContours(grayDiff, contourAreaSlider->x, contourAreaSlider->y, 3, false);
         }
-        Rhand.x = user.right_lower_arm.position[1].X;
-        Rhand.y = user.right_lower_arm.position[1].Y;
-        Lhand.x = user.left_lower_arm.position[1].X;
-        Lhand.y = user.left_lower_arm.position[1].Y;
-        midi.sendControlChange(KinectMidiChannel, 3, (user.neck.position[1].X /640) *127);
-    }else{
-        setUserDetected(false);
-        arduino.sendDigital(letsDancePin, ARD_LOW);
-        arduino.sendDigital(calibratingPin, ARD_LOW);
-        arduino.sendDigital(waitingForUserPin, ARD_HIGH);
+        if(log){
+        switch (contourFinder.nBlobs) {
+            case 0:
+                ofLogNotice() << "Geen contouren!";
+                break;
+                
+            default:
+                ofxCvBlob blob = contourFinder.blobs[contourFinder.nBlobs -1];
+                ofLogNotice() << "contour n: " << contourFinder.nBlobs << " area: " << blob.area;
+                break;
+        }
+        }
     }
 }
 
@@ -292,7 +285,21 @@ void testApp::setUserDetected(bool userDetected){
 }
 
 void testApp::setKinectAngle(int & angle){
-    kinect.setTiltAngle(angle);
+    kinect.setCameraTiltAngle(angle);
+    ofLogNotice() << "Angle: " << kinect.getCurrentCameraTiltAngle();
+}
+
+void testApp::setBackgroundImg(){
+    grayBg.setFromPixels(kinect.getDepthPixels(), 640, 480);
+    if (!backgroundSet) {
+        backgroundSet = true;
+        ofColor green(0, 255, 0);
+        btnSetBackground.setTextColor(green);
+    }
+}
+
+void testApp::setVideoThreshold(int & threshold){
+    videoTreshold = threshold;
 }
 
 // ===== ARDUINO =====
@@ -398,16 +405,6 @@ void testApp::sendMidiSignals(){
     
     //kinect signalen
     if (_userDetected) {
-        midi.sendControlChange(KinectMidiChannel, 4, (Lhand.x/640) *127);
-        midi.sendControlChange(KinectMidiChannel, 5, (Lhand.y/480) *127);
-
-        midi.sendControlChange(KinectMidiChannel, 7, (Rhand.x/640) *127);
-        midi.sendControlChange(KinectMidiChannel, 8, (Rhand.y/480) *127);
-        
-        midi.sendControlChange(VideoMidiChannel, 1, (Lhand.x/640) *127);
-        
-        midi.sendControlChange(VideoMidiChannel, 2, (Rhand.x/640) *127);
-        midi.sendControlChange(VideoMidiChannel, 3, (Rhand.y/480) *127);
 
     }
 }
@@ -420,8 +417,14 @@ void testApp::keyPressed(int key){
         case 's':
             showData = !showData;
             break;
+        case 'k':
+            showKinectControls = !showKinectControls;
+            break;
         case 'r':
             cam.reset();
+            break;
+        case 'l':
+            log = true;
             break;
         case '1':
             setPad(0, true);
@@ -440,16 +443,6 @@ void testApp::keyPressed(int key){
             break;
         case '6':
             setPad(5, true);
-            break;
-        case 'u':
-            if (kinect.getTiltAngle() <= 25) {
-                kinect.setTiltAngle(kinect.getTiltAngle() + 2);
-                kinect.update();
-            }
-            break;
-        case 'd':
-            kinect.setTiltAngle(kinect.getTiltAngle() - 2);
-            kinect.update();
             break;
     }
 }
@@ -474,6 +467,9 @@ void testApp::keyReleased(int key){
             break;
         case '6':
             setPad(5, false);
+            break;
+        case 'l':
+            log = false;
             break;
     }
 }
