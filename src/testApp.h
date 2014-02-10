@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxGui.h"
 #include "ofxMidi.h"
 #include "ofxLeapMotion.h"
 #include "ofxSyphon.h"
@@ -25,9 +26,15 @@ class testApp : public ofBaseApp{
         vector<ofPoint> fingersYpos;
         vector<ofxLeapMotionSimpleHand> simplehands;
         void GetLeapData();
+        int prevLX = 0;
+        int prevLY = 0;
+        int prevRX = 0;
+        int prevRY = 0;
     
     
     // ===== KINECT =====
+        ofxHardwareDriver kinect;
+        ofxIntSlider KinectAngleSlider;
         ofxOpenNIContext NIContext;
         ofxDepthGenerator NIdepthGen;
         ofxUserGenerator NIuserGen;
@@ -35,6 +42,7 @@ class testApp : public ofBaseApp{
         void setUserDetected(bool userDetected);
     
         void updateKinectData();
+        void setKinectAngle(int & angle);
         ofPoint Rhand;
         ofPoint Lhand;
     
@@ -46,24 +54,25 @@ class testApp : public ofBaseApp{
         void digitalPinChanged(const int & pinNum);
         void analogPinChanged(const int & pinNum);
         void updateArduino();
-        void KnockHandler(int pinNum);
+        void setPad(int padNum, bool val);
+        void setTreshold(int & treshold);
 
-        const int waitingForUserPin = 3;
-        const int calibratingPin = 4;
-        const int letsDancePin = 5;
+        const int waitingForUserPin = 4;
+        const int calibratingPin = 2;
+        const int letsDancePin = 3;
     
         const int knockSensorPin = 1;
-        const int knockTreshold = 200;
+        int _treshold = 5;
+        ofxIntSlider treshold;
     
     // ===== MIDI =====
         ofxMidiOut midi;
     
         const int KinectMidiChannel = 1;
-        const int ArduinoMidiChannel = 2;
-        const int LeapMidiChannel = 3;
+        const int ArduinoMidiChannel = 1;
+        const int LeapMidiChannel = 1;
         const int VideoMidiChannel = 15;
-        vector<int> chordNotes;
-        vector<bool> playingChordNotes;
+        vector<bool> playingPads;
     
         void sendMidiSignals();
     

@@ -3,23 +3,29 @@
 ================
 
 
-Channel 1: Kinect
+Channel 1: ABLETON
 -----------------
 
-CC 20 : Start the kinect clip (velocity 127);
-CC 21 : stop the kinect clip (velocity 127);
+CC 01 : Start the kinect clip (velocity 127);
+CC 01 : stop the kinect clip (velocity 0);
 
+CC 03 : X positie van de user.
 CC 04 : Linkerhand x-pos naar kinect params in Live
 CC 05 : Linkerhand y-pos naar kinect params in Live
 CC 07 : rechterhand x-pos naar kinect params in Live
 CC 08 : rechterhand y-pos naar kinect params in Live
 
 
+NOTE 1-6: drumclips vanaf de pads.
+
+CC 20 : Leap linkerhand aan
+CC 21 : Leap rechterhand aan
+CC 10-14 : Ypos van de vingers van het linkerhand
+CC 15-19 : Ypos van de vingers van het rechterhand
 
 
 
-
-Channel 15: Video
+Channel 15: VIDEO
 -----------------
 
 CC 20 : start de kinectvideo op vel 127 en stopt op vel 0

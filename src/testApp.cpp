@@ -3,25 +3,14 @@
 // ===== OPEN FRAMEWORKS =====
 void testApp::setup(){
     ofBackground(0);
-    ofSetFrameRate(60);
-    ofSetCircleResolution(180);
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    ofSetFrameRate(25);
+    ofSetCircleResolution(50);
     
     //Midisetup: poorten oplijsten + virtuele poort aanmaken + de constante waarden aanmaken
     midi.listPorts();
     midi.openVirtualPort("MaanSteen");
-    chordNotes.push_back(60);
-    chordNotes.push_back(67);
-    chordNotes.push_back(76);
-    chordNotes.push_back(52);
-    chordNotes.push_back(84);
-    chordNotes.push_back(43);
-    chordNotes.push_back(91);
-    chordNotes.push_back(36);
-    chordNotes.push_back(96);
-    chordNotes.push_back(28);
-    for (int i = 0; i < 10; i++) {
-        playingChordNotes.push_back(false);
+    for (int i = 0; i < 6; i++) {
+        playingPads.push_back(false);
     }
     
     
@@ -29,19 +18,29 @@ void testApp::setup(){
     leap.open();
     
     //setup the arduino over firmata
-    arduino.connect("/dev/tty.usbmodem1451",57600);
+    arduino.connect("/dev/tty.usbmodem14531",57600);
     ofAddListener(arduino.EInitialized, this, &testApp::setupArduino);
     arduinoIsSetup = false;
+    treshold.setup("Pads Treshold", _treshold, 0, 80);
+    treshold.setPosition(600, 330);
+    treshold.addListener(this, &testApp::setTreshold);
     
+    //kinect device aanspreken voor beeldhoek
+    kinect.setup();
+    KinectAngleSlider.setup("Kinect Angle", kinect.getTiltAngle(), -30, 30);
+    KinectAngleSlider.setPosition(300, 330);
+    KinectAngleSlider.addListener(this, &testApp::setKinectAngle);
     //kinect oproepen via openNI
-//    NIContext.setup();
-//    NIdepthGen.setup(&NIContext);
-//    NIuserGen.setup(&NIContext);
-//    _userDetected = false;
-//    Rhand.x = 0;
-//    Rhand.y = 0;
-//    Lhand.x = 0;
-//    Lhand.y = 0;
+    NIContext.setup();
+    NIdepthGen.setup(&NIContext);
+    NIuserGen.setup(&NIContext);
+    NIuserGen.setMaxNumberOfUsers(1);
+    NIContext.registerViewport();
+    _userDetected = false;
+    Rhand.x = 0;
+    Rhand.y = 0;
+    Lhand.x = 0;
+    Lhand.y = 0;
     
     
     //syphon server opstarten voor het doorsturen van de beelden naar het syphon framework
@@ -55,22 +54,24 @@ void testApp::setup(){
 void testApp::update(){
     GetLeapData();
     updateArduino();
-//    updateKinectData();
+    updateKinectData();
     
     sendMidiSignals();
 }
 
 void testApp::draw(){
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+
     cam.begin();
     // Draw system.
     ofSetLineWidth(2.0);
     particleSystem.draw(tex);
     cam.end();
 
-
     // hiervoor alle drawing die naar Syphon wordt gestuurd.
     syphonOutput.publishScreen();
     
+    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
     ofSetColor(255);
     if (showData) {
         // leapdata
@@ -84,22 +85,38 @@ void testApp::draw(){
         }
         
         // kinectdata
-        ofDrawBitmapString("Kinect DepthImage + Users", 25, 14);
+        NIdepthGen.draw(0,0,440,330);
+        NIuserGen.draw(440,330);
+        ofDrawBitmapString("Kinect DepthImage + Users", 5, 340);
         if (_userDetected) {
-            ofSetColor(0, 200, 200);
-            ofEllipse(Rhand, 20, 20);
-            ofEllipse(Lhand, 20, 20);
+            ofSetColor(255, 255, 50);
+            ofCircle((Lhand.x / 640)*440, (Lhand.y / 480)*330, 10);
+            ofCircle((Rhand.x / 640)*440, (Rhand.y / 480)*330, 10);
+            ofSetColor(255);
+            ofDrawBitmapString("L-X: "+ofToString(Lhand.x), 440, 40);
+            ofDrawBitmapString("L-Y: "+ofToString(Lhand.y), 440, 70);
+            ofDrawBitmapString("R-X: "+ofToString(Rhand.x), 440, 100);
+            ofDrawBitmapString("R-Y: "+ofToString(Rhand.y), 440, 130);
         }
-        NIdepthGen.draw(5,20,400,300);
-        NIuserGen.draw();
-        ofLine(0, 330, 1024, 330);
+        ofSetColor(255);
+        KinectAngleSlider.draw();
+        ofLine(0, 350, 1024, 350);
         
         //padsdata
-        ofLine(450, 0, 450, 330);
-        ofDrawBitmapString("Drumpads", 460, 14);
+        treshold.draw();
+        ofLine(550, 0, 550, 350);
+        ofDrawBitmapString("Drumpads (test met nummers 1-6)", 560, 14);
+        for (int i = 0; i < playingPads.size(); i++) {
+            if (playingPads[i]) {
+                ofSetColor(0,200,30);
+            }else{
+                ofSetColor(255);
+            }
+            ofCircle(650 + (i * 120) - (round(i/3) * 360), 100 + (round(i/3) * 120), 40);
+        }
 
     }
-
+    ofSetColor(255);
     ofDrawBitmapString("druk S voor de datavisualisaties.", 20, 748);
 }
 
@@ -127,7 +144,6 @@ void testApp::GetLeapData(){
     }
     
     updateParticles();
-    
 }
 
 // ===== PARTICLES =====
@@ -137,23 +153,24 @@ void testApp::setupParticles(){
 
     leftEmitter.setPosition(ofVec3f(100, 100));
     leftEmitter.setVelocity(ofVec3f(150.0, 150.0, -150.0));
-    leftEmitter.posSpread = ofVec3f(10, 10, 10);
-    leftEmitter.velSpread = ofVec3f(10.0,10);
-    leftEmitter.life = 20;
-    leftEmitter.lifeSpread = 5.0;
+    leftEmitter.posSpread = ofVec3f(1, 1, 1);
+    leftEmitter.velSpread = ofVec3f(200,200,200);
+    leftEmitter.life = 2;
+    leftEmitter.lifeSpread = 10;
     leftEmitter.numPars = 1;
-    leftEmitter.color = ofColor(200, 100, 100);
+    leftEmitter.color = ofColor(230, 255, 50);
     leftEmitter.colorSpread = ofColor(50, 50, 50);
     leftEmitter.size = 22;
     
     rightEmitter.setPosition(ofVec3f(100, 100));
     rightEmitter.setVelocity(ofVec3f(-150.0, 150.0, 150.0));
     rightEmitter.posSpread = ofVec3f(10, 10, 10);
-    rightEmitter.life = 20;
-    rightEmitter.lifeSpread = 5.0;
+    rightEmitter.velSpread = ofVec3f(200,200,200);
+    rightEmitter.life = 2;
+    rightEmitter.lifeSpread = 10;
     rightEmitter.numPars = 1;
     rightEmitter.size = 22;
-    rightEmitter.color = ofColor(100, 100, 200);
+    rightEmitter.color = ofColor(0, 200, 255);
     rightEmitter.colorSpread = ofColor(50, 50, 50);
     
     vectorField.allocate(128, 128, 3);
@@ -167,6 +184,41 @@ void testApp::setupParticles(){
 }
 
 void testApp::updateParticles(){
+    switch (simplehands.size()) {
+        case 0:
+            midi.sendControlChange(LeapMidiChannel, 20, 0);
+            midi.sendControlChange(LeapMidiChannel, 21, 0);
+            leftEmitter.numPars = 0;
+            rightEmitter.numPars = 0;
+            break;
+            
+        case 1:
+            midi.sendControlChange(LeapMidiChannel, 20, 127);
+            midi.sendControlChange(LeapMidiChannel, 21, 0);
+            leftEmitter.numPars = floor((abs(prevLX - simplehands[0].handPos.x)+abs(prevLY - simplehands[0].handPos.y))/3);
+            rightEmitter.numPars = 0;
+            leftEmitter.setPosition(ofVec3f(simplehands[0].handPos.x*2, simplehands[0].handPos.y*2 - 400));
+            prevLX = simplehands[0].handPos.x;
+            prevLY = simplehands[0].handPos.y;
+            break;
+            
+        case 2:
+            midi.sendControlChange(LeapMidiChannel, 20, 127);
+            midi.sendControlChange(LeapMidiChannel, 21, 127);
+            leftEmitter.numPars = floor((abs(prevLX - simplehands[0].handPos.x)+abs(prevLY - simplehands[0].handPos.y))/3);
+            rightEmitter.numPars = floor((abs(prevRX - simplehands[1].handPos.x)+abs(prevRY - simplehands[1].handPos.y))/3);
+            leftEmitter.setPosition(ofVec3f(simplehands[0].handPos.x*2, simplehands[0].handPos.y*2 -400));
+            rightEmitter.setPosition(ofVec3f(simplehands[1].handPos.x*2, simplehands[1].handPos.y*2 -400));
+            prevLX = simplehands[0].handPos.x;
+            prevLY = simplehands[0].handPos.y;
+            prevRX = simplehands[1].handPos.x;
+            prevRY = simplehands[1].handPos.y;
+            break;
+            
+        default:
+            break;
+    }
+    
     for (int y = 0; y < vectorField.getHeight(); y++) {
         for (int x = 0; x< vectorField.getWidth(); x++) {
             int index = vectorField.getPixelIndex(x, y);
@@ -217,6 +269,7 @@ void testApp::updateKinectData(){
         Rhand.y = user.right_lower_arm.position[1].Y;
         Lhand.x = user.left_lower_arm.position[1].X;
         Lhand.y = user.left_lower_arm.position[1].Y;
+        midi.sendControlChange(KinectMidiChannel, 3, (user.neck.position[1].X /640) *127);
     }else{
         setUserDetected(false);
         arduino.sendDigital(letsDancePin, ARD_LOW);
@@ -229,13 +282,17 @@ void testApp::setUserDetected(bool userDetected){
     if (userDetected != _userDetected) {
         _userDetected = userDetected;
         if (_userDetected) {
-            midi.sendControlChange(KinectMidiChannel, 20, 127);
+            midi.sendControlChange(KinectMidiChannel, 1, 127);
             midi.sendControlChange(VideoMidiChannel, 20, 127);
         }else{
-            midi.sendControlChange(KinectMidiChannel, 21, 127);
+            midi.sendControlChange(KinectMidiChannel, 1, 0);
             midi.sendControlChange(VideoMidiChannel, 20, 0);
         }
     }
+}
+
+void testApp::setKinectAngle(int & angle){
+    kinect.setTiltAngle(angle);
 }
 
 // ===== ARDUINO =====
@@ -248,8 +305,12 @@ void testApp::setupArduino(const int &version){
     
     //de arduino pinnen instellen op hoe ze zullen worden gebruikt...
     arduino.sendAnalogPinReporting(0, ARD_ANALOG);
-    arduino.sendAnalogPinReporting(knockSensorPin, ARD_ANALOG);
+    arduino.sendAnalogPinReporting(1, ARD_ANALOG);
     arduino.sendAnalogPinReporting(2, ARD_ANALOG);
+    arduino.sendAnalogPinReporting(3, ARD_ANALOG);
+    arduino.sendAnalogPinReporting(4, ARD_ANALOG);
+    arduino.sendAnalogPinReporting(5, ARD_ANALOG);
+
     
     arduino.sendDigitalPinMode(13, ARD_OUTPUT);
     arduino.sendDigitalPinMode(calibratingPin, ARD_OUTPUT);
@@ -292,58 +353,51 @@ void testApp::digitalPinChanged(const int &pinNum){
 }
 
 void testApp::analogPinChanged(const int &pinNum){
-    switch (pinNum) {
-        case 0:
-            {
-            float potval = arduino.getAnalog(0);
-            int ccval = (potval/1024)*128;
-                ofLogNotice() << "ccval: " << ccval;
-            midi.sendControlChange(VideoMidiChannel, 1, ccval);
-            }
-            break;
-            
-        default:
-            {
-                int sensorval = arduino.getAnalog(pinNum);
-                ofLogNotice() << "knocksensor: " << sensorval;
-                if (sensorval > knockTreshold) {
-                    KnockHandler(pinNum);
-                }
-            }
-            break;
-            
-
+    int sensorval = arduino.getAnalog(pinNum);
+//    ofLogNotice() << "knocksensor " << pinNum <<": " << sensorval;
+    if (sensorval >> _treshold) {
+        setPad(pinNum, true);
+    }else{
+        setPad(pinNum, false);
     }
 }
 
-void testApp::KnockHandler(int pinNum){
-    midi.sendControlChange(VideoMidiChannel, (30+pinNum), 127);
-    
-    //TODO: muzieknoten versturen naar live.
+void testApp::setTreshold(int & treshold){
+    _treshold = treshold;
+}
+
+void testApp::setPad(int padNum, bool val){
+    if (playingPads[padNum] != val) {
+        playingPads[padNum] = val;
+        if (val) {
+            arduino.sendDigital(13, ARD_HIGH);
+            midi.sendNoteOn(ArduinoMidiChannel, padNum);
+        }else{
+            arduino.sendDigital(13, ARD_LOW);
+            midi.sendNoteOff(ArduinoMidiChannel, padNum);
+        }
+    }
 }
 
 // ===== MIDI =====
 
 void testApp::sendMidiSignals(){
     //leap vingers. Elke midi noot die een aansignaal krijgt moet ook weer uitgezet worden. Blijven commando's sturen is uit den boze!
-    for (int i = 0; i < 10; i++) {
-        if (i < fingersYpos.size()) {
-            if (!playingChordNotes[i]) {
-                midi.sendNoteOn(i+1, chordNotes[i],127);
-                playingChordNotes[i] = true;
-            }
-            midi.sendControlChange(16, i+1, (fingersYpos[i].y/480)*127);
+    for (int i = 0; i < simplehands.size(); i++) {
+        int midiStartValue;
+        if (i == 1) {
+            midiStartValue = 15;
         }else{
-            if (playingChordNotes[i]) {
-                midi.sendNoteOff(i+1, chordNotes[i]);
-                playingChordNotes[i] = false;
-            }
+            midiStartValue = 10;
+        }
+        
+        for (int j = 0; j < simplehands[i].fingers.size(); j++) {
+            midi.sendControlChange(LeapMidiChannel, midiStartValue + j, (simplehands[i].fingers[j].pos.y /500)*127);
         }
     }
     
     //kinect signalen
     if (_userDetected) {
-        ofLogNotice() << "rhand x: " << Rhand.x;
         midi.sendControlChange(KinectMidiChannel, 4, (Lhand.x/640) *127);
         midi.sendControlChange(KinectMidiChannel, 5, (Lhand.y/480) *127);
 
@@ -369,11 +423,59 @@ void testApp::keyPressed(int key){
         case 'r':
             cam.reset();
             break;
+        case '1':
+            setPad(0, true);
+            break;
+        case '2':
+            setPad(1, true);
+            break;
+        case '3':
+            setPad(2, true);
+            break;
+        case '4':
+            setPad(3, true);
+            break;
+        case '5':
+            setPad(4, true);
+            break;
+        case '6':
+            setPad(5, true);
+            break;
+        case 'u':
+            if (kinect.getTiltAngle() <= 25) {
+                kinect.setTiltAngle(kinect.getTiltAngle() + 2);
+                kinect.update();
+            }
+            break;
+        case 'd':
+            kinect.setTiltAngle(kinect.getTiltAngle() - 2);
+            kinect.update();
+            break;
     }
 }
 
 //--------------------------------------------------------------
 void testApp::keyReleased(int key){
+    switch (key) {
+        case '1':
+            setPad(0, false);
+            break;
+        case '2':
+            setPad(1, false);
+            break;
+        case '3':
+            setPad(2, false);
+            break;
+        case '4':
+            setPad(3, false);
+            break;
+        case '5':
+            setPad(4, false);
+            break;
+        case '6':
+            setPad(5, false);
+            break;
+    }
 }
 
 //--------------------------------------------------------------
