@@ -53,6 +53,7 @@
 		6C5B7BB31846A6420045A116 /* Leap.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C5B7BAB1846A6420045A116 /* Leap.lib */; };
 		6C5B7BB41846A6420045A116 /* Leapd.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C5B7BAD1846A6420045A116 /* Leapd.lib */; };
 		6C5B7BB81846AA2B0045A116 /* Syphon.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6C5B7BB71846AA2B0045A116 /* Syphon.framework */; };
+		6CEBE7E618A9228E001C9AF2 /* Syphon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D58DCB2C0AEFDE6171E29540 /* Syphon.framework */; };
 		6CEEDBC7185B6212003579DF /* ofxParticle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEEDBBA185B6212003579DF /* ofxParticle.cpp */; };
 		6CEEDBC8185B6212003579DF /* ofxParticleEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEEDBBC185B6212003579DF /* ofxParticleEmitter.cpp */; };
 		6CEEDBC9185B6212003579DF /* ofxParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEEDBBF185B6212003579DF /* ofxParticleSystem.cpp */; };
@@ -533,6 +534,7 @@
 				E7F985F815E0DEA3003869B5 /* Accelerate.framework in Frameworks */,
 				E7E077E815D3B6510020DFD4 /* QTKit.framework in Frameworks */,
 				6C5B7BB31846A6420045A116 /* Leap.lib in Frameworks */,
+				6CEBE7E618A9228E001C9AF2 /* Syphon.framework in Frameworks */,
 				6C5B7B981846A5700045A116 /* libnimRecorder.dylib in Frameworks */,
 				E4EB6799138ADC1D00A09F29 /* GLUT.framework in Frameworks */,
 				6C5B7B961846A5700045A116 /* libnimCodecs.dylib in Frameworks */,
@@ -1959,6 +1961,7 @@
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"/Users/wouter/<:devine>/_EXD/OFx/apps/myApps/_EXD_Eindopdracht_MAANSTEEN/Syphon/lib/osx",
+					/Users/wouter/_devine/_EXD/OFx/addons/ofxSyphon/libs/Syphon/lib/osx,
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../libs/glut/lib/osx\"";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2050,6 +2053,7 @@
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"/Users/wouter/<:devine>/_EXD/OFx/apps/myApps/_EXD_Eindopdracht_MAANSTEEN/Syphon/lib/osx",
+					/Users/wouter/_devine/_EXD/OFx/addons/ofxSyphon/libs/Syphon/lib/osx,
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../libs/glut/lib/osx\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
