@@ -41,6 +41,7 @@ void testApp::setup(){
     kinectDataPanel.add(videoThresholdSlider.setup("threshold", videoTreshold, 0, 200));
     kinectDataPanel.add(contourAreaSlider.setup("Contour Area", ofVec2f(5000, 20000), ofVec2f(0, 0), ofVec2f(100000, 100000)));
     kinectDataPanel.add(btnSetBackground.setup("Set the background"));
+    kinectDataPanel.add(btnColorImg.setup("Take Color Image", false));
     _userDetected = false;
     
     //syphon server opstarten voor het doorsturen van de beelden naar het syphon framework
@@ -249,12 +250,20 @@ void testApp::updateKinectData(){
     kinect.setDepthClipping(cameraViewSlider->x,cameraViewSlider->y);
     
     if (kinect.isFrameNewDepth()) {
-        grayImage.setFromPixels(kinect.getDepthPixels(), 640, 480);
+        if (btnColorImg.getParameter().cast<bool>()) {
+            ofxCvColorImage color;
+            color.setFromPixels(kinect.getPixelsRef());
+            grayImage = color;
+        }else{
+            grayImage.setFromPixels(kinect.getDepthPixelsRef());
+        }
         if (backgroundSet) {
             grayDiff.absDiff(grayBg, grayImage);
             grayDiff.threshold(videoTreshold);
             grayDiff.threshold(videoTreshold);
             contourFinder.findContours(grayDiff, contourAreaSlider->x, contourAreaSlider->y, 3, false);
+        }else{
+            setBackgroundImg();
         }
         if(log){
         switch (contourFinder.nBlobs) {
@@ -290,7 +299,13 @@ void testApp::setKinectAngle(int & angle){
 }
 
 void testApp::setBackgroundImg(){
-    grayBg.setFromPixels(kinect.getDepthPixels(), 640, 480);
+    if (btnColorImg.getParameter().cast<bool>()) {
+        ofxCvColorImage color;
+        color.setFromPixels(kinect.getPixelsRef());
+        grayBg = color;
+    }else{
+        grayBg.setFromPixels(kinect.getDepthPixelsRef());
+    }
     if (!backgroundSet) {
         backgroundSet = true;
         ofColor green(0, 255, 0);

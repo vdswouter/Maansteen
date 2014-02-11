@@ -48,6 +48,7 @@ class testApp : public ofBaseApp{
     ofxVec2Slider contourAreaSlider;
     ofxVec2Slider cameraViewSlider;
     ofxButton btnSetBackground;
+    ofxToggle btnColorImg;
     bool _userDetected;
     bool showKinectControls = false;
     void setUserDetected(bool userDetected);

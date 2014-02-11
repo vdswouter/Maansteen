@@ -53,7 +53,7 @@
 		6C5B7BB31846A6420045A116 /* Leap.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C5B7BAB1846A6420045A116 /* Leap.lib */; };
 		6C5B7BB41846A6420045A116 /* Leapd.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C5B7BAD1846A6420045A116 /* Leapd.lib */; };
 		6C5B7BB81846AA2B0045A116 /* Syphon.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6C5B7BB71846AA2B0045A116 /* Syphon.framework */; };
-		6CEBE7E618A9228E001C9AF2 /* Syphon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D58DCB2C0AEFDE6171E29540 /* Syphon.framework */; };
+		6CEC774A18AA9E3200F6FF44 /* Syphon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C5B7BB71846AA2B0045A116 /* Syphon.framework */; };
 		6CEEDBC7185B6212003579DF /* ofxParticle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEEDBBA185B6212003579DF /* ofxParticle.cpp */; };
 		6CEEDBC8185B6212003579DF /* ofxParticleEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEEDBBC185B6212003579DF /* ofxParticleEmitter.cpp */; };
 		6CEEDBC9185B6212003579DF /* ofxParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEEDBBF185B6212003579DF /* ofxParticleSystem.cpp */; };
@@ -461,7 +461,6 @@
 		D464E7DA8DC38F011A322BF5 /* ofxTrackedUser.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxTrackedUser.h; path = ../../../addons/ofxOpenNI/src/ofxTrackedUser.h; sourceTree = SOURCE_ROOT; };
 		D4C6BABF31054A0321B64742 /* RtError.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = RtError.h; path = ../../../addons/ofxMidi/libs/rtmidi/RtError.h; sourceTree = SOURCE_ROOT; };
 		D4DDC483DAD2C0353077AF28 /* ofxVectorGraphics.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxVectorGraphics.h; path = ../../../addons/ofxVectorGraphics/src/ofxVectorGraphics.h; sourceTree = SOURCE_ROOT; };
-		D58DCB2C0AEFDE6171E29540 /* Syphon.framework */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = wrapper.framework; name = Syphon.framework; path = ../../../addons/ofxSyphon/libs/Syphon/lib/osx/Syphon.framework; sourceTree = "<group>"; };
 		D5A3AFF36064B2CACAD31716 /* composite_index.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = composite_index.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/composite_index.h; sourceTree = SOURCE_ROOT; };
 		D5BB6F0357B6422E1B1656B4 /* ofxCvColorImage.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxCvColorImage.h; path = ../../../addons/ofxOpenCv/src/ofxCvColorImage.h; sourceTree = SOURCE_ROOT; };
 		D76A59E7B3601E76351C9BDB /* cvaux.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = cvaux.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv/cvaux.h; sourceTree = SOURCE_ROOT; };
@@ -527,6 +526,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6CEC774A18AA9E3200F6FF44 /* Syphon.framework in Frameworks */,
 				6C5B7BA11846A5700045A116 /* libXnVFeatures_1_5_2.dylib in Frameworks */,
 				6C5B7B9E1846A5700045A116 /* libXnDeviceSensorV2KM.dylib in Frameworks */,
 				6C5B7B9C1846A5700045A116 /* libXnDDK.dylib in Frameworks */,
@@ -534,7 +534,6 @@
 				E7F985F815E0DEA3003869B5 /* Accelerate.framework in Frameworks */,
 				E7E077E815D3B6510020DFD4 /* QTKit.framework in Frameworks */,
 				6C5B7BB31846A6420045A116 /* Leap.lib in Frameworks */,
-				6CEBE7E618A9228E001C9AF2 /* Syphon.framework in Frameworks */,
 				6C5B7B981846A5700045A116 /* libnimRecorder.dylib in Frameworks */,
 				E4EB6799138ADC1D00A09F29 /* GLUT.framework in Frameworks */,
 				6C5B7B961846A5700045A116 /* libnimCodecs.dylib in Frameworks */,
@@ -1408,7 +1407,6 @@
 				E45BE97A0E8CC7DD009D7055 /* QuickTime.framework */,
 				E7E077E415D3B63C0020DFD4 /* CoreVideo.framework */,
 				E7E077E715D3B6510020DFD4 /* QTKit.framework */,
-				D58DCB2C0AEFDE6171E29540 /* Syphon.framework */,
 			);
 			name = "system frameworks";
 			sourceTree = "<group>";
@@ -1962,6 +1960,7 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"/Users/wouter/<:devine>/_EXD/OFx/apps/myApps/_EXD_Eindopdracht_MAANSTEEN/Syphon/lib/osx",
 					/Users/wouter/_devine/_EXD/OFx/addons/ofxSyphon/libs/Syphon/lib/osx,
+					"/Users/wouter/<:devine>/_EXD/OFx/apps/myApps/_EXD_Eindopdracht_MAANSTEEN",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../libs/glut/lib/osx\"";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2054,6 +2053,7 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"/Users/wouter/<:devine>/_EXD/OFx/apps/myApps/_EXD_Eindopdracht_MAANSTEEN/Syphon/lib/osx",
 					/Users/wouter/_devine/_EXD/OFx/addons/ofxSyphon/libs/Syphon/lib/osx,
+					"/Users/wouter/<:devine>/_EXD/OFx/apps/myApps/_EXD_Eindopdracht_MAANSTEEN",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../libs/glut/lib/osx\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
