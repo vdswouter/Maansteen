@@ -15,7 +15,7 @@ void testApp::setup(){
     
     
     //start de leapmotion
-//    leap.open();
+    leap.open();
     
     //setup the arduino over firmata
     arduino.connect("/dev/tty.usbmodem14531",57600);
@@ -53,11 +53,11 @@ void testApp::setup(){
 }
 
 void testApp::update(){
-//    GetLeapData();
-//    updateArduino();
+    GetLeapData();
+    updateArduino();
     updateKinectData();
     
-//    sendMidiSignals();
+    sendMidiSignals();
 }
 
 void testApp::draw(){
