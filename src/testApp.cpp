@@ -18,12 +18,12 @@ void testApp::setup(){
 //    leap.open();
     
     //setup the arduino over firmata
-//    arduino.connect("/dev/tty.usbmodem14531",57600);
-//    ofAddListener(arduino.EInitialized, this, &testApp::setupArduino);
-//    arduinoIsSetup = false;
-//    treshold.setup("Pads Treshold", _treshold, 0, 80);
-//    treshold.setPosition(600, 330);
-//    treshold.addListener(this, &testApp::setTreshold);
+    arduino.connect("/dev/tty.usbmodem14531",57600);
+    ofAddListener(arduino.EInitialized, this, &testApp::setupArduino);
+    arduinoIsSetup = false;
+    treshold.setup("Pads Treshold", _treshold, 0, 80);
+    treshold.setPosition(600, 330);
+    treshold.addListener(this, &testApp::setTreshold);
     
     //kinect device aanspreken voor beeldhoek
     kinect.init();
@@ -275,6 +275,10 @@ void testApp::updateKinectData(){
         switch (contourFinder.nBlobs) {
             case 1:
                 setUserDetected(true);
+                arduino.sendDigital(waitingForUserPin, ARD_HIGH);
+                arduino.sendDigital(calibratingPin, ARD_LOW);
+                arduino.sendDigital(letsDancePin, ARD_LOW);
+
                 blob1 = contourFinder.blobs[0];
                 depth1 = cameraViewSlider->y - kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
                 midi.sendControlChange(KinectMidiChannel, 3, (blob1.centroid.x/kinect.getWidth())*127);
@@ -288,6 +292,9 @@ void testApp::updateKinectData(){
                 break;
             case 2:
                 setUserDetected(true);
+                arduino.sendDigital(waitingForUserPin, ARD_HIGH);
+                arduino.sendDigital(calibratingPin, ARD_LOW);
+                arduino.sendDigital(letsDancePin, ARD_HIGH);
                 blob1 = contourFinder.blobs[0];
                 blob2 = contourFinder.blobs[1];
                 depth1 = cameraViewSlider->y - kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
@@ -303,6 +310,9 @@ void testApp::updateKinectData(){
                 break;
             case 3:
                 setUserDetected(true);
+                arduino.sendDigital(waitingForUserPin, ARD_HIGH);
+                arduino.sendDigital(calibratingPin, ARD_HIGH);
+                arduino.sendDigital(letsDancePin, ARD_HIGH);
                 blob1 = contourFinder.blobs[0];
                 blob2 = contourFinder.blobs[1];
                 blob3 = contourFinder.blobs[2];
