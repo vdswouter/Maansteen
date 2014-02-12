@@ -331,6 +331,9 @@ void testApp::updateKinectData(){
             default:
                 //ofLogNotice() << "Geen contouren!";
                 setUserDetected(false);
+                arduino.sendDigital(waitingForUserPin, ARD_LOW);
+                arduino.sendDigital(calibratingPin, ARD_LOW);
+                arduino.sendDigital(letsDancePin, ARD_LOW);
                 break;
                 
         }
