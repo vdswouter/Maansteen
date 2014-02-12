@@ -276,7 +276,7 @@ void testApp::updateKinectData(){
             case 1:
                 setUserDetected(true);
                 blob1 = contourFinder.blobs[0];
-                depth1 = kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
+                depth1 = cameraViewSlider->y - kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
                 midi.sendControlChange(KinectMidiChannel, 3, (blob1.centroid.x/kinect.getWidth())*127);
                 midi.sendControlChange(KinectMidiChannel, 4, (depth1/cameraViewSlider->y)*127);
                 midi.sendControlChange(KinectMidiChannel, 7, (depth1/cameraViewSlider->y)*127);
@@ -290,8 +290,8 @@ void testApp::updateKinectData(){
                 setUserDetected(true);
                 blob1 = contourFinder.blobs[0];
                 blob2 = contourFinder.blobs[1];
-                depth1 = kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
-                depth2 = kinect.getDistanceAt(blob2.centroid.x, blob2.centroid.y);
+                depth1 = cameraViewSlider->y - kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
+                depth2 = cameraViewSlider->y - kinect.getDistanceAt(blob2.centroid.x, blob2.centroid.y);
                 midi.sendControlChange(KinectMidiChannel, 3, (blob1.centroid.x/kinect.getWidth())*127);
                 midi.sendControlChange(KinectMidiChannel, 4, (depth1/cameraViewSlider->y)*127);
                 midi.sendControlChange(KinectMidiChannel, 7, (depth2/cameraViewSlider->y)*127);
@@ -305,10 +305,10 @@ void testApp::updateKinectData(){
                 setUserDetected(true);
                 blob1 = contourFinder.blobs[0];
                 blob2 = contourFinder.blobs[1];
-                blob3 = contourFinder.blobs[3];
-                depth1 = kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
-                depth2 = kinect.getDistanceAt(blob2.centroid.x, blob2.centroid.y);
-                depth3 = kinect.getDistanceAt(blob2.centroid.x, blob3.centroid.y);
+                blob3 = contourFinder.blobs[2];
+                depth1 = cameraViewSlider->y - kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
+                depth2 = cameraViewSlider->y - kinect.getDistanceAt(blob2.centroid.x, blob2.centroid.y);
+                depth3 = cameraViewSlider->y - kinect.getDistanceAt(blob3.centroid.x, blob3.centroid.y);
                 midi.sendControlChange(KinectMidiChannel, 3, (blob1.centroid.x/kinect.getWidth())*127);
                 midi.sendControlChange(KinectMidiChannel, 4, (depth1/cameraViewSlider->y)*127);
                 midi.sendControlChange(KinectMidiChannel, 7, (depth3/cameraViewSlider->y)*127);

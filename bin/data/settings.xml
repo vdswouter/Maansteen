@@ -1,3 +1,8 @@
 <group>
-	<Kinect_Angle>2</Kinect_Angle>
+	<Kinect_Angle>0</Kinect_Angle>
+<group/>
+	<Kinect_View_Depth__mm_>653.061, 5224.49</Kinect_View_Depth__mm_>
+	<threshold>79</threshold>
+	<Contour_Area>8673.47, 63775.5</Contour_Area>
+	<Take_Color_Image>0</Take_Color_Image>
 </group>
