@@ -265,17 +265,64 @@ void testApp::updateKinectData(){
         }else{
             setBackgroundImg();
         }
-        if(log){
+        ofxCvBlob blob1;
+        ofxCvBlob blob2;
+        ofxCvBlob blob3;
+        
+        int depth1;
+        int depth2;
+        int depth3;
         switch (contourFinder.nBlobs) {
-            case 0:
-                ofLogNotice() << "Geen contouren!";
+            case 1:
+                setUserDetected(true);
+                blob1 = contourFinder.blobs[0];
+                depth1 = kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
+                midi.sendControlChange(KinectMidiChannel, 3, (blob1.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(KinectMidiChannel, 4, (depth1/cameraViewSlider->y)*127);
+                midi.sendControlChange(KinectMidiChannel, 7, (depth1/cameraViewSlider->y)*127);
+                midi.sendControlChange(KinectMidiChannel, 5, (blob1.centroid.y/kinect.getHeight())*127);
+                midi.sendControlChange(KinectMidiChannel, 8, (blob1.centroid.y/kinect.getHeight())*127);
+                midi.sendControlChange(VideoMidiChannel, 1, (depth1/cameraViewSlider->y)*127);
+                midi.sendControlChange(VideoMidiChannel, 2, (blob1.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(VideoMidiChannel, 3, (blob1.centroid.y/kinect.getHeight())*127);
+                break;
+            case 2:
+                setUserDetected(true);
+                blob1 = contourFinder.blobs[0];
+                blob2 = contourFinder.blobs[1];
+                depth1 = kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
+                depth2 = kinect.getDistanceAt(blob2.centroid.x, blob2.centroid.y);
+                midi.sendControlChange(KinectMidiChannel, 3, (blob1.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(KinectMidiChannel, 4, (depth1/cameraViewSlider->y)*127);
+                midi.sendControlChange(KinectMidiChannel, 7, (depth2/cameraViewSlider->y)*127);
+                midi.sendControlChange(KinectMidiChannel, 5, (blob1.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(KinectMidiChannel, 8, (blob2.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(VideoMidiChannel, 1, (depth1/cameraViewSlider->y)*127);
+                midi.sendControlChange(VideoMidiChannel, 2, (blob1.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(VideoMidiChannel, 3, (blob2.centroid.x/kinect.getWidth())*127);
+                break;
+            case 3:
+                setUserDetected(true);
+                blob1 = contourFinder.blobs[0];
+                blob2 = contourFinder.blobs[1];
+                blob3 = contourFinder.blobs[3];
+                depth1 = kinect.getDistanceAt(blob1.centroid.x, blob1.centroid.y);
+                depth2 = kinect.getDistanceAt(blob2.centroid.x, blob2.centroid.y);
+                depth3 = kinect.getDistanceAt(blob2.centroid.x, blob3.centroid.y);
+                midi.sendControlChange(KinectMidiChannel, 3, (blob1.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(KinectMidiChannel, 4, (depth1/cameraViewSlider->y)*127);
+                midi.sendControlChange(KinectMidiChannel, 7, (depth3/cameraViewSlider->y)*127);
+                midi.sendControlChange(KinectMidiChannel, 5, (blob3.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(KinectMidiChannel, 8, (blob2.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(VideoMidiChannel, 1, (blob3.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(VideoMidiChannel, 2, (blob1.centroid.x/kinect.getWidth())*127);
+                midi.sendControlChange(VideoMidiChannel, 3, (blob2.centroid.x/kinect.getWidth())*127);
+                break;
+            default:
+                //ofLogNotice() << "Geen contouren!";
+                setUserDetected(false);
                 break;
                 
-            default:
-                ofxCvBlob blob = contourFinder.blobs[contourFinder.nBlobs -1];
-                ofLogNotice() << "contour n: " << contourFinder.nBlobs << " area: " << blob.area;
-                break;
-        }
         }
     }
 }
