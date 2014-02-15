@@ -18,7 +18,7 @@ void testApp::setup(){
     leap.open();
     
     //setup the arduino over firmata
-    arduino.connect("/dev/tty.usbmodem14531",57600);
+    arduino.connect("/dev/tty.usbmodem14111",57600);
     ofAddListener(arduino.EInitialized, this, &testApp::setupArduino);
     arduinoIsSetup = false;
     treshold.setup("Pads Treshold", _treshold, 0, 80);
